@@ -20,7 +20,11 @@ git clone https://github.com/getMISTified/myMIST-slack-queries.git
 * Assuming you've set up Google Cloud SDK correctly, go ahead and run  
 
 ```
-gcloud functions deploy pullRegData --runtime nodejs14 --trigger-http --set-env-vars "SLACK_SECRET=<INSERT_YOUR_SECRET>" --allow-unauthenticated
+gcloud functions deploy pullRegData \
+--runtime nodejs14 \
+--trigger-http \
+--set-env-vars "SLACK_SECRET=<INSERT_YOUR_SECRET>,EVENT_ID=<YOUR_EVENT_ID>" \
+--allow-unauthenticated
 ```
 
 * Return to the Slack App management interface and supply the Request URL with the URL of your cloud function (see **Configuring the application** from the GCP CF setup guide), but append it with the appropriate routes as listed in the next section. (e.g: for "reg_total" command, request URL should be XXX_YOUR_REQUEST_URL_XXX"**/total**")
