@@ -23,11 +23,11 @@ git clone https://github.com/getMISTified/myMIST-slack-queries.git
 gcloud functions deploy pullRegData --runtime nodejs14 --trigger-http --set-env-vars "SLACK_SECRET=<INSERT_YOUR_SECRET>" --allow-unauthenticated
 ```
 
-* Return to the Slack App management interface and supply the Request URL with the URL of your cloud function (see **Configuring the application** from the GCP CF setup guide), but append it with the appropriate routes as listed in the next section. (e.g: for "reg_total" command, request URL should be XXX_YOUR_REQUEST_URL_XXX**/total**)
+* Return to the Slack App management interface and supply the Request URL with the URL of your cloud function (see **Configuring the application** from the GCP CF setup guide), but append it with the appropriate routes as listed in the next section. (e.g: for "reg_total" command, request URL should be XXX_YOUR_REQUEST_URL_XXX"**/total**")
 * Test your slash command out in a private channel!
 
 ## Currently Supported Queries
-* `reg_total`: Pulls total number of competitors registered for tournament.
+* `reg_total`: Pulls total number of competitors registered for tournament. | Route: `/total`
 
 ## Contributions
 * `index.js` contains all the logic for handling the different routes for each slash command and the query + data manipulation logic.
