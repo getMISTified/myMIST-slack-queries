@@ -2,7 +2,7 @@
 Slack slash command app to pull registration data directly from myMIST. Slack Slash commands generates POST request which is handled by GCP Cloud Function which POSTs myMIST with GraphQL query.
 
 ## Example Use
-`reg_total` generates total number of competitors.
+`/reg_total` generates total number of competitors.
 
 ## Setup
 * Set up Slash Commands in your Slack workspace following the guide [here](https://api.slack.com/interactivity/slash-commands)
