@@ -18,6 +18,7 @@
   "homepage": "https://github.com/sameed-khan/MIST_reg_data_getter#readme",
   "dependencies": {
     "@slack/events-api": "^3.0.1",
+    "dotenv": "^15.0.0",
     "node-fetch": "^2.6.7"
   }
 }

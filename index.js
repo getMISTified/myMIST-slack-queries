@@ -7,15 +7,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post("/total", async (req, res) => {
     let raw_response = await fetch("https://api2.getmistified.com/graphql", {
-        "headers": {
+        method: "POST",
+        mode: "cors",
+        credentials: "include",
+        headers: {
             "accept": "application/json",
             "content-type": "application/json",
             "token": "qN9450ZbWAgaktfKBUanMC5h"
         },
-        "body": "{\"query\":\"{\\n  eventStudents(eventId: 63) {\\n    id\\n  }\\n}\",\"variables\":null}",
-        "method": "POST",
-        "mode": "cors",
-        "credentials": "include"
+        body: JSON.stringify({
+            query: `
+            query eventStudents($EVENT_ID: ID!) {
+                eventStudents(eventId: $EVENT_ID) { id }
+            }`,
+            variables: { EVENT_ID: process.env.EVENT_ID }
+        })
     });
     let gql_res = await raw_response.json()
 
