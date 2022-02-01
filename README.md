@@ -17,13 +17,15 @@ git clone https://github.com/getMISTified/myMIST-slack-queries.git
 ```
   
 * Find your Slack signing secret from the **Basic Information** section of your newly created Slack App.
+* Get your getMISTified token by logging into my.getmistified.com and head over to any registration management page where you can view coaches, students, admins, etc.
+ * Open up your browser's Inspect tool, open up the "Network" tab at the top and view the "Headers" of any of the `graphql` requests that show up. Copy the `token` header.
 * Assuming you've set up Google Cloud SDK correctly, go ahead and run  
 
 ```
 gcloud functions deploy pullRegData \
 --runtime nodejs14 \
 --trigger-http \
---set-env-vars "SLACK_SECRET=<INSERT_YOUR_SECRET>,EVENT_ID=<YOUR_EVENT_ID>" \
+--set-env-vars "SLACK_SECRET=<INSERT_YOUR_SECRET>,EVENT_ID=<YOUR_EVENT_ID>,TOKEN=<YOUR_GETMISTIFIED_TOKEN>" \
 --allow-unauthenticated
 ```
 
