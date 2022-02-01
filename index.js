@@ -13,7 +13,7 @@ app.post("/total", async (req, res) => {
         headers: {
             "accept": "application/json",
             "content-type": "application/json",
-            "token": "qN9450ZbWAgaktfKBUanMC5h"
+            "token": process.env.TOKEN
         },
         body: JSON.stringify({
             query: `
