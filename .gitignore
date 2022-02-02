@@ -1,6 +1,7 @@
 # File itself
 .git
 .gitignore
+.gcloudignore
 
 # Dependency directories
 node_modules/
@@ -9,6 +10,7 @@ node_modules/
 %1
 
 # Local testing files
+local_testing.js
 .env
 
 # Only going to edit on remote
