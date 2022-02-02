@@ -34,6 +34,7 @@ gcloud functions deploy pullRegData \
 
 ## Currently Supported Queries
 * `reg_total`: Pulls total number of competitors registered for tournament. | Route: `/total`
+* `reg_comp <comp_name> <lvl> <M/F>`: Pulls competitor count (soon other data) by competition | Route: `/comp`jk
 
 ## Contributions
 * `index.js` contains all the logic for handling the different routes for each slash command and the query + data manipulation logic.
