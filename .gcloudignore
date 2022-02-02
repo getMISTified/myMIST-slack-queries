@@ -12,8 +12,10 @@
 # below:
 .git
 .gitignore
+.env
 
 node_modules
 local_testing.js
 gql_request.ps1
 gql_request.sh
+

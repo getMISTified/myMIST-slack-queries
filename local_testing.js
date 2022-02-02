@@ -1,39 +1,74 @@
-const fetch = require("node-fetch");
 const express = require("express");
 const bodyParser = require("body-parser");
+const { request, gql, GraphQLClient } = require("graphql-request")
+const { getOfficialName, getCompetitorCount, IllegalInputError } = require("./comp_input_handler")
 require('dotenv').config();
-
-console.log(process.env.EVENT_ID);
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post("/total", async (req, res) => {
-    let raw_response = await fetch("https://api2.getmistified.com/graphql", {
-        method: "POST",
-        mode: "cors",
-        credentials: "include",
-        headers: {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "token": "qN9450ZbWAgaktfKBUanMC5h"
-        },
-        body: JSON.stringify({
-            query: `
-            query eventStudents($EVENT_ID: ID!) {
-                eventStudents(eventId: $EVENT_ID) { id }
-            }`,
-            variables: { EVENT_ID: process.env.EVENT_ID }
-        })
-    });
-    let gql_res = await raw_response.json()
-    console.log(gql_res)
+// Set up some global variables
+const graphQLClient = new GraphQLClient("https://api2.getmistified.com/graphql", {
+    headers: {
+        "accept":"application/json",
+        "content-type":"application/json",
+        "token": process.env.TOKEN
+    },
+    mode: "cors",
+    credentials: "include",
+})
 
-    // fetch returns a list of competitor IDs attending MIST. Return length of this array for registration numbers
+app.post("/total", async (req, res) => {
+    let query = gql`
+    query eventStudents($EVENT_ID: ID!) {
+        eventStudents(eventId: $EVENT_ID) { id }
+    }`
+    let variables = {
+        EVENT_ID: process.env.EVENT_ID,
+    }
+    let gql_res = await graphQLClient.request(query, variables);
     res.json({
         "response_type":"in_channel",
-        "text": `Total No. Competitors: ${gql_res.data.eventStudents.length}` 
+        "text": `Total No. Competitors: ${gql_res.eventStudents.length}` 
     })
+});
+
+app.post("/comp", async(req, res) => {
+        // const query = gql`
+        // query fetchEventDetail($id: Int!) {
+            // fetchEventDetail(id: $id) {
+                // fetchEventCompetitions {id title joinedMemberCount }
+            // }
+        // }`
+        const query2 = gql`
+        query eventDetail($id: Int!) {
+            fetchEventAppDetail(id: $id) {
+                id fetchEventCompetitions { id title joinedMemberCount }
+            }
+        }`
+        let variables = {
+            "id": parseInt(process.env.EVENT_ID),
+        }
+        gql_res = await graphQLClient.request(query2, variables);
+        // console.log(gql_res.fetchEventAppDetail.fetchEventCompetitions)
+        try {
+            offName = getOfficialName(req.body.text);
+        } catch (IllegalInputError) {
+            res.json({
+                "response_type":"ephemeral",
+                "type":"mrkdwn",
+                "text": "Invalid competition entry. Please follow usage hints; for competition names, please select one of the following:" +
+                "\n>```KT1, KT2, KT3\nQM1, QM2, QM3, QR\n2D Art, 3D Art, Fashion Design, Graphic Design, Photography\n" +
+                "\nExtemp Speaking, Original Oratory, Spoken Word, Creative Writing\nDebate, Math Olympics, Quiz Bowl, Improv\n" +
+                "\nBusiness Venture, Humanitarian Service\nNasheed, Science Fair, Short Film\nBasketball, Soccer```"
+            })
+        }
+        memberCount = getCompetitorCount(offName, gql_res)
+        res.json({
+            "response_type":"in_channel",
+            "type": "mrkdwn",
+            "text": `Competitor Report for | *${offName.replace(/\*/g, "")}* |\n>*Competitor Count:* ${memberCount}` 
+        })
 });
 
 app.listen(3000);

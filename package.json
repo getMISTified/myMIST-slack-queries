@@ -19,6 +19,8 @@
   "dependencies": {
     "@slack/events-api": "^3.0.1",
     "dotenv": "^15.0.0",
+    "graphql": "^16.3.0",
+    "graphql-request": "^4.0.0",
     "node-fetch": "^2.6.7"
   }
 }
