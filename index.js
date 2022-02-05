@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { request, gql, GraphQLClient } = require("graphql-request")
-const { getOfficialName, getCompetitorCount, IllegalInputError } = require("./comp_input_handler")
+const { getOfficialName, getCompetitorCount, getAll, IllegalInputError } = require("./comp_input_handler")
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,6 +55,13 @@ app.post("/comp", async(req, res) => {
                 "\nBusiness Venture, Humanitarian Service\nNasheed, Science Fair, Short Film\nBasketball, Soccer```"
             })
         }
+
+        // if user requests report of all competitors
+        if (offName === "all") {
+            res.json(getAll(offName, gql_res));
+            return
+        }
+
         memberCount = getCompetitorCount(offName, gql_res)
         res.json({
             "response_type":"in_channel",

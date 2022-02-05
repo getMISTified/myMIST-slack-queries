@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { request, gql, GraphQLClient } = require("graphql-request")
-const { getOfficialName, getCompetitorCount, IllegalInputError } = require("./comp_input_handler")
+const { getOfficialName, getCompetitorCount, getAll, IllegalInputError } = require("./comp_input_handler")
 require('dotenv').config();
 
 const app = express();
@@ -50,7 +50,7 @@ app.post("/comp", async(req, res) => {
             "id": parseInt(process.env.EVENT_ID),
         }
         gql_res = await graphQLClient.request(query2, variables);
-        // console.log(gql_res.fetchEventAppDetail.fetchEventCompetitions)
+        
         try {
             offName = getOfficialName(req.body.text);
         } catch (IllegalInputError) {
@@ -63,12 +63,19 @@ app.post("/comp", async(req, res) => {
                 "\nBusiness Venture, Humanitarian Service\nNasheed, Science Fair, Short Film\nBasketball, Soccer```"
             })
         }
-        memberCount = getCompetitorCount(offName, gql_res)
+        
+        // if user requests report of all competitors
+        if (offName === "all") {
+            res.json(getAll(offName, gql_res));
+            return
+        }
+
+        memberCount = getCompetitorCount(offName, gql_res);
         res.json({
             "response_type":"in_channel",
             "type": "mrkdwn",
             "text": `Competitor Report for | *${offName.replace(/\*/g, "")}* |\n>*Competitor Count:* ${memberCount}` 
-        })
+        });
 });
 
 app.listen(3000);

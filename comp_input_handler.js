@@ -48,7 +48,11 @@ class IllegalInputError extends Error {
 // @param string: userComp - name of event provided by user in Slack slash command
 // @return string: myMIST name of event to match against data JSON response from myMIST graphQL endpoint
 function getOfficialName (userComp) {
-    let modString = userComp.replace(/\s/g, '').toLowerCase();
+    if (userComp.toLowerCase() === "all") {
+        return "all"
+    }
+    
+    modString = userComp.replace(/\s/g, '').toLowerCase();
     for(x of NAMES_TO_OFFICIAL.keys()) {
         if (x.includes(modString)) { return NAMES_TO_OFFICIAL.get(x); }
     }
@@ -78,6 +82,45 @@ function getCompetitorCount(officialName, data) {
     throw new Error("getCompetitorCount could not match user input string.")
 }
 
+// @ param string: offName, official myMIST name of competition, output from getCompetitorCount
+// @ param JSON: data, graphQL JSON payload response
+// special function for constructing a block-kit formatted response if competitor requests all competitions
+function getAll(offName, data) {
+    const SECTION_COMPONENT = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn"
+        }
+    }
+
+    let BLOCK_KIT_ARRAY = {
+        "response_type": "ephemeral",
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Cumulative Competitor Report"
+                }
+            },
+            {
+                "type": "divider"
+            }
+        ]
+    }
+
+    compArray = data.fetchEventAppDetail.fetchEventCompetitions;
+    for (comp of compArray) {
+        // create deep copy of SECTION_COMPONENT template
+        temp = JSON.parse(JSON.stringify(SECTION_COMPONENT));
+        temp.text.text = `${comp.title.replace(/\*/g, "")}\n>*Competitor Count:* ${comp.joinedMemberCount}`;
+        BLOCK_KIT_ARRAY.blocks.push(temp);
+    }
+    
+    return BLOCK_KIT_ARRAY
+}
+
 exports.IllegalInputError = IllegalInputError;
 exports.getOfficialName = getOfficialName;
 exports.getCompetitorCount = getCompetitorCount;
+exports.getAll = getAll;
