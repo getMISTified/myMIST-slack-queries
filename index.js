@@ -36,7 +36,7 @@ app.post("/comp", async(req, res) => {
         const query = gql`
         query eventDetail($id: Int!) {
             fetchEventAppDetail(id: $id) {
-                id fetchEventCompetitions { id title joinedMemberCount }
+                id fetchEventCompetitions { id title joinedMemberCount users }
             }
         }`
         let variables = {
@@ -59,15 +59,9 @@ app.post("/comp", async(req, res) => {
         // if user requests report of all competitors
         if (offName === "all") {
             res.json(getAll(offName, gql_res));
-            return
+        } else {
+            res.json(getCompetitorCount(offName, gql_res));
         }
-
-        memberCount = getCompetitorCount(offName, gql_res)
-        res.json({
-            "response_type":"in_channel",
-            "type": "mrkdwn",
-            "text": `Competitor Report for | *${offName.replace(/\*/g, "")}* |\n>*Competitor Count:* ${memberCount}` 
-        })
 });
 
 exports.pullRegData = app;

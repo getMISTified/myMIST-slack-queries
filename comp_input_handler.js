@@ -77,7 +77,24 @@ function getOfficialName (userComp) {
 function getCompetitorCount(officialName, data) {
     compArray = data.fetchEventAppDetail.fetchEventCompetitions;
     for(comp of compArray) {
-        if (comp.title === officialName) {return comp.joinedMemberCount;}
+        if (comp.title !== officialName) { continue; }
+
+        if (comp.joinedMemberCount !== 0) {
+            var [ comps, schools ] = parseDataHelper(comp.users);
+        } else {
+            var comps = [];
+            var schools = [];
+        }
+        return {
+            "response_type":"in_channel",
+            "type": "mrkdwn",
+            "text": `Competition Report for | *${offName.replace(/\*/g, "")}* | \
+            \n>*Competitor Count:* ${comp.joinedMemberCount} \
+            \n>*School Count:* ${schools.length} \
+            \n>*Competitors:* ${comps} \
+            \n>*Schools:* ${schools}` 
+        }
+        
     }
     throw new Error("getCompetitorCount could not match user input string.")
 }
@@ -111,15 +128,39 @@ function getAll(offName, data) {
 
     compArray = data.fetchEventAppDetail.fetchEventCompetitions;
     for (comp of compArray) {
+        if (comp.joinedMemberCount !== 0) {
+            var [ comps, schools ] = parseDataHelper(comp.users)
+        } else {
+            var comps = [];
+            var schools = [];
+        }
         // create deep copy of SECTION_COMPONENT template
         temp = JSON.parse(JSON.stringify(SECTION_COMPONENT));
-        temp.text.text = `${comp.title.replace(/\*/g, "")}\n>*Competitor Count:* ${comp.joinedMemberCount}`;
+        temp.text.text = `${comp.title.replace(/\*/g, "")} \
+        \n>*Competitor Count:* ${comp.joinedMemberCount} \
+        \n>*School Count:* ${schools.length} \
+        \n>*Competitors*: ${comps} \
+        \n>*Schools*: ${schools}`;
+
         BLOCK_KIT_ARRAY.blocks.push(temp);
     }
     
-    return BLOCK_KIT_ARRAY
+    return BLOCK_KIT_ARRAY;
 }
 
+// function that returns items such as team count, users, etc, given JSON data payload
+function parseDataHelper (usersData) {
+    competitorsOut = [];
+    schoolsOutArr = []; 
+
+    for (user of usersData) {
+        if (user.member.status == "waitlist") { continue; }
+        competitorsOut.push( ` ${user.user.full_name} (${user.user.code})` );
+        schoolsOutArr.push(` ${user.school.name}`);
+    }
+    schoolsOut = [...new Set(schoolsOutArr)];
+    return [ competitorsOut, schoolsOut ];
+}
 exports.IllegalInputError = IllegalInputError;
 exports.getOfficialName = getOfficialName;
 exports.getCompetitorCount = getCompetitorCount;
