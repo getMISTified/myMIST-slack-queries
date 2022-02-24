@@ -38,16 +38,14 @@ const NAMES_TO_OFFICIAL = new Map([
     [["cw", "creative", "writing", "creativewriting"], "Creative Writing"],
     [["socmed", "social", "media", "socialmedia"], "Social Media"],
 ]);
+const { IllegalInputError } = require("./errors.js")
 
-class IllegalInputError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "IllegalInputError";
-    }
-}
 // @param string: userComp - name of event provided by user in Slack slash command
 // @return string: myMIST name of event to match against data JSON response from myMIST graphQL endpoint
 function getOfficialName (userComp) {
+    if (userComp == "") {
+        throw new IllegalInputError("No input provided!")
+    }
     if (userComp.toLowerCase() === "all") {
         return "all"
     }
@@ -161,7 +159,6 @@ function parseDataHelper (usersData) {
     schoolsOut = [...new Set(schoolsOutArr)];
     return [ competitorsOut, schoolsOut ];
 }
-exports.IllegalInputError = IllegalInputError;
 exports.getOfficialName = getOfficialName;
 exports.getCompetitorCount = getCompetitorCount;
 exports.getAll = getAll;
