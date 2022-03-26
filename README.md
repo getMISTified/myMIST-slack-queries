@@ -2,39 +2,31 @@
 Slack slash command app to pull registration data directly from myMIST. Slack Slash commands generates POST request which is handled by GCP Cloud Function which POSTs myMIST with GraphQL query.
 
 ## Example Use
-`/reg_total` generates total number of competitors.
+`/nat_total <event_ID>` generates total number of competitors.
+`/nat_comp <event_ID> <competition title>` generates competition-specific information.
 
 ## Setup
-* Set up Slash Commands in your Slack workspace following the guide [here](https://api.slack.com/interactivity/slash-commands)
-  * Ignore the directions on Request URL and anything after "Preparing your app to receive commands"
-* Set up a Google Cloud Platform (GCP) cloud function by following the "Before You Begin" section in [this guide](https://cloud.google.com/functions/docs/tutorials/slack)
-  * The actual code for the function is irrelevant, we will replace it with our function instead. 
-  * After this, create a local directory to store the code and clone this Git repository there  
-  
-```
-mkdir slack-query-app
-git clone https://github.com/getMISTified/myMIST-slack-queries.git
-```
-  
-* Find your Slack signing secret from the **Basic Information** section of your newly created Slack App.
-* Get your getMISTified token by logging into my.getmistified.com and head over to any registration management page where you can view coaches, students, admins, etc.
- * Open up your browser's Inspect tool, open up the "Network" tab at the top and view the "Headers" of any of the `graphql` requests that show up. Copy the `token` header.
-* Assuming you've set up Google Cloud SDK correctly, go ahead and run  
+Updated: Adding the app to your Slack workspace is as easy as pressing the button below!
+<br>
+<br>
+<a href="https://slack.com/oauth/v2/authorize?client_id=9051026354.3028883127907&scope=commands,chat:write&user_scope="><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcSet="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
 
-```
-gcloud functions deploy pullRegData \
---runtime nodejs14 \
---trigger-http \
---set-env-vars "SLACK_SECRET=<INSERT_YOUR_SECRET>,EVENT_ID=<YOUR_EVENT_ID>,TOKEN=<YOUR_GETMISTIFIED_TOKEN>" \
---allow-unauthenticated
-```
-
-* Return to the Slack App management interface and supply the Request URL with the URL of your cloud function (see **Configuring the application** from the GCP CF setup guide), but append it with the appropriate routes as listed in the next section. (e.g: for "reg_total" command, request URL should be XXX_YOUR_REQUEST_URL_XXX"**/total**")
-* Test your slash command out in a private channel!
+If the above doesn't work you can also try [this link](https://slack.com/oauth/v2/authorize?client_id=9051026354.3028883127907&scope=commands,chat:write&user_scope=).
 
 ## Currently Supported Queries
-* `reg_total`: Pulls total number of competitors registered for tournament. | Route: `/total`
-* `reg_comp <comp_name> <lvl> <M/F>`: Pulls competitor count, school count, competitor names, and school names for supplied competition. You can also provide "all" as `comp_name` to get a listing of all competitions in your event. When user provides `comp_name`, the name is checked against a mapping of potential inputs to official myMIST competition names (i.e: user inputs "BV" which maps to "Business Venture"). This mapping is specific to MIST Detroit competitions and may not contain certain competitions your region supports. See the top of `comp_input_handler.js` to edit accordingly. | Route: `/comp`
+* `nat_total <event_ID>`: Pulls total number of competitors registered for tournament. | Route: `/nat_total`
+* `nat_comp <event_ID> <comp_name> <lvl> <M/F>`: Pulls competitor count, school count, competitor names, and school names for supplied competition. You can also provide "all" as `comp_name` to get a listing of all competitions in your event. When user provides `comp_name`, the name is checked against a mapping of potential inputs to official myMIST competition names (i.e: user inputs "BV" which maps to "Business Venture"). This mapping is specific to MIST Detroit competitions and may not contain certain competitions your region supports. See the top of `comp_input_handler.js` to edit accordingly. | Route: `/nat_comp`
+
+## Event ID Table
+These will likely change every cycle and are only valid for the 2022 season, contact mhaddara@getmistified.com for more information.
+
+| **Region Name** | **Event ID** |
+|-----------------|--------------|
+|Detroit|63
+|New York|67
+|DC|57
+|Toronto|56
+|Florida|66
 
 ## Contributions
 * `index.js` contains all the logic for handling the different routes for each slash command and the query + data manipulation logic.
