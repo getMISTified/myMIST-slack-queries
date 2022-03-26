@@ -22,11 +22,21 @@ These will likely change every cycle and are only valid for the 2022 season, con
 
 | **Region Name** | **Event ID** |
 |-----------------|--------------|
-|Detroit|63
-|New York|67
-|DC|57
+|Houston|50
+|Dallas|51
+|New Jersey|52
+|SoCal|55
 |Toronto|56
+|DC|57
+|Atlanta|58
+|Columbus|60
+|Detroit|63
+|Carolina|64
+|Nashville|65
 |Florida|66
+|New York|67
+|St. Louis|68
+|Philadelphia|71
 
 ## Contributions
 * `index.js` contains all the logic for handling the different routes for each slash command and the query + data manipulation logic.
