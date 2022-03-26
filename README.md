@@ -18,7 +18,7 @@ If the above doesn't work you can also try [this link](https://slack.com/oauth/v
 * `nat_comp <event_ID> <comp_name> <lvl> <M/F>`: Pulls competitor count, school count, competitor names, and school names for supplied competition. You can also provide "all" as `comp_name` to get a listing of all competitions in your event. When user provides `comp_name`, the name is checked against a mapping of potential inputs to official myMIST competition names (i.e: user inputs "BV" which maps to "Business Venture"). This mapping is specific to MIST Detroit competitions and may not contain certain competitions your region supports. See the top of `comp_input_handler.js` to edit accordingly. | Route: `/nat_comp`
 
 ## Event ID Table
-These will likely change every cycle and are only valid for the 2022 season, contact mhaddara@getmistified.com for more information.
+These will change every cycle and are only valid for the 2022 season, contact mhaddara@getmistified.com for more information.
 
 | **Region Name** | **Event ID** |
 |-----------------|--------------|
