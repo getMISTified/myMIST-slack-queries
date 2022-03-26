@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const { request, gql, GraphQLClient } = require("graphql-request")
 const { getOfficialName, getCompetitorCount, getAll } = require("./comp_input_handler")
 const { IllegalInputError } = require("./errors.js")
+const { authorizer } = require("./install.js")
 const fetch = require("node-fetch")
 require('dotenv').config();
 
@@ -20,6 +21,12 @@ const graphQLClient = new GraphQLClient("https://api2.getmistified.com/graphql",
     credentials: "include",
 })
 
+// Handle first-time installation of Slack app
+app.get("/auth", async (req, res) => {
+    const oauth_response = await authorizer(req.body.code);
+    console.log("Access token: ", oauth_response.access_token);
+    res.sendStatus(200); // This is misleading if this throws an error; may fix later
+});
 
 app.post("/total", async (req, res) => {
     // Responding outside of 3000ms time limit
