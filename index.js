@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const { request, gql, GraphQLClient } = require("graphql-request")
 const { getOfficialName, getCompetitorCount, getAll } = require("./comp_input_handler")
 const { IllegalInputError } = require("./errors.js")
-const { authorizer } = require("./install.js")
 const fetch = require("node-fetch")
 require('dotenv').config();
 
@@ -15,7 +14,7 @@ const graphQLClient = new GraphQLClient("https://api2.getmistified.com/graphql",
     headers: {
         "accept":"application/json",
         "content-type":"application/json",
-        "token": process.env.TOKEN
+        "token": process.env.GETMISTIFIED_SUPER_TOKEN
     },
     mode: "cors",
     credentials: "include",
@@ -23,10 +22,23 @@ const graphQLClient = new GraphQLClient("https://api2.getmistified.com/graphql",
 
 // Handle first-time installation of Slack app
 app.get("/auth", async (req, res) => {
-    const oauth_response = await authorizer(req.body.code);
-    console.log("Access token: ", oauth_response.access_token);
-    res.sendStatus(200); // This is misleading if this throws an error; may fix later
-});
+    if (!req.query.code) {
+        console.log("Access denied!");
+        return;
+    }
+    try {
+        const oauth_response = await (new WebClient()).oauth.v2.access({
+            client_id: process.env.SLACK_CLIENT_ID,
+            client_secret: process.env.SLACK_CLIENT_SECRET,
+            code: req.query.code
+        });
+        console.log("Access token: ", oauth_response.access_token);
+    } catch (e) {
+        console.error(e);
+    } finally {
+        res.sendStatus(200);
+    }
+}) 
 
 app.post("/total", async (req, res) => {
     // Responding outside of 3000ms time limit
@@ -84,6 +96,58 @@ app.post("/nat_total", async(req, res) => {
         body: JSON.stringify(res_body),
         headers: {'Content-type': 'application/json'}
     });
+});
+
+app.post("/nat_comp", async(req, res) => {
+        // Responding outside of 3000ms time limit, start by sending 200 OK status
+        res.sendStatus(200);
+        
+        // Parse slash command argument into appropriate pieces
+        args = req.body.text.split(' ');
+        event_id = args[0];
+        remaining = args.slice(1,).join('');
+
+        res_body = {
+            "text": "Your request returned an unhandled error. Sorry!"
+        }; // JS object holding Block Kit formatted message, etc
+
+        // Handle query creation and getting data from myMIST
+        const query2 = gql`
+        query eventDetail($id: Int!) {
+            fetchEventAppDetail(id: $id) {
+                id fetchEventCompetitions { id title joinedMemberCount users }
+            }
+        }`;
+        let variables = {
+            "id": parseInt(event_id),
+        };
+        gql_res = await graphQLClient.request(query2, variables);
+        
+        try {
+            offName = getOfficialName(remaining);
+            if (offName === "all") {
+                res_body = getAll(offName, gql_res);
+            } else {
+                res_body = getCompetitorCount(offName, gql_res);
+            }
+        } catch (IllegalInputError) {
+            res_body = {
+                "response_type":"ephemeral",
+                "type":"mrkdwn",
+                "text": "Invalid competition entry. Please follow usage hints; for competition names, please select one of the following:" +
+                "\n>```KT1, KT2, KT3\nQM1, QM2, QM3, QR\n2D Art, 3D Art, Fashion Design, Graphic Design, Photography\n" +
+                "\nExtemp Speaking, Original Oratory, Spoken Word, Creative Writing\nDebate, Math Olympics, Quiz Bowl, Improv\n" +
+                "\nBusiness Venture, Humanitarian Service\nNasheed, Science Fair, Short Film\nBasketball, Soccer```"
+            }; 
+        }
+        
+        // Get response_url to send a POST request back to the same place the slash command came from
+        response_url = req.body.response_url;
+        fetch(response_url, {
+            method: "POST",
+            body: JSON.stringify(res_body),
+            headers: {"Content-type": "application/json"}
+        });
 });
 
 app.post("/comp", async(req, res) => {
